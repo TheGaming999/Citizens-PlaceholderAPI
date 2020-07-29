@@ -1,0 +1,10 @@
+main: me.citizensplaceholderapi.CitizensPlaceholderAPI
+version: 1.0
+name: CitizensPlaceholderAPI
+depend: [PlaceholderAPI, Citizens]
+author: TheGaming999
+commands:
+  citizensplaceholderapi:
+    usage: /<command>
+    description: commando
+    aliases: [citizenspapi, cpapi, cplaceholderapi, npcpapi, npcplaceholderapi]
