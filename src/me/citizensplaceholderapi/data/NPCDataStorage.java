@@ -18,6 +18,8 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.npc.skin.SkinnableEntity;
+import net.citizensnpcs.trait.SkinLayers;
+import net.citizensnpcs.trait.SkinTrait;
 import net.citizensnpcs.util.NMS;
 
 public class NPCDataStorage {
@@ -124,8 +126,10 @@ public class NPCDataStorage {
 		addNamePlaceholder(ndh);
 		addSkinPlaceholder(ndh);
 		}
-		update();
-		plugin.getConfigManager().saveConfig("data.yml");
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+			update();
+			plugin.getConfigManager().saveConfig("data.yml");
+		});
 	}
 	
 	public void deleteNPC(final UUID uniqueId) {
@@ -173,8 +177,11 @@ public class NPCDataStorage {
 				if(!npc.isSpawned()) {
 					return;
 				}
+				if(npc.getEntity() == null) {
+					return;
+				}
 				if(npcDataHandler.getNamePlaceholder() != null) {
-			    	TaskChain <?> tc = plugin.getTaskChainFactory().newSharedChain("citizensUpdate");
+			    	TaskChain <?> tc = plugin.getTaskChainFactory().newSharedChain("citizensUpdateName");
 				    tc
 				    .async(() -> {
 				    	//setNamePAPI(player, namePlaceholders.get(i));
@@ -186,7 +193,7 @@ public class NPCDataStorage {
 				if(npcDataHandler.getSkinPlaceholder() == null) {
 					return;
 				}
-		    	TaskChain <?> tc = plugin.getTaskChainFactory().newSharedChain("citizensUpdate");
+		    	TaskChain <?> tc = plugin.getTaskChainFactory().newSharedChain("citizensUpdateSkin");
 			    tc
 			    .async(() -> {
 			    	//setSkinPAPI(player, skinPlaceholders.get(i));
@@ -195,9 +202,17 @@ public class NPCDataStorage {
 					npc.data().set(NPC.PLAYER_SKIN_USE_LATEST, false);
 		        })
 			    .sync(() -> { 
-					SkinnableEntity skinnableEntity = NMS.getSkinnable(npc.getEntity());
+					SkinnableEntity skinnableEntity = (SkinnableEntity)npc.getEntity();
+					try {
+					SkinTrait st = npc.getTrait(SkinTrait.class);
+					st.setSkinName(replaced2.getString(), true);
+					} catch (Exception ex) {
+						
+					}
 					if(skinnableEntity != null) {
 						skinnableEntity.setSkinName(replaced2.getString());
+						if(skinnableEntity.getSkinTracker() != null)
+						skinnableEntity.getSkinTracker().notifySkinChange(true);
 					}
 			    })
 			    .execute();

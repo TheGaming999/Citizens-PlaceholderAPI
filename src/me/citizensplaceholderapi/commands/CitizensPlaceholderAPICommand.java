@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -92,7 +93,7 @@ public class CitizensPlaceholderAPICommand implements CommandExecutor {
 						sender.sendMessage("---------------------------------");
 					});
 				default:
-					this.plugin.getNPCDataStorage().update();
+					Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> plugin.getNPCDataStorage().update());
 					break;
 				}
 				break;
